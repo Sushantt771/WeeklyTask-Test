@@ -1,0 +1,18 @@
+public class Payloads {
+
+    public static final String POST_PAYLOAD = "{\n" +
+            "    \"name\": \"Sushant\",\n" +
+            "    \"job\": \"SoftwareQA\"\n" +
+            "}";
+
+
+    public static final String PUT_PAYLOAD = "{\n" +
+            "    \"name\": \"SushantGupta\",\n" +
+            "    \"job\": \"AutomationQA\"\n" +
+            "}";
+
+    public static final String PATCH_PAYLOAD = "{\n" +
+            "    \"name\": \"SushantGupta\",\n" +
+            "    \"job\": \"SrAutomationQA\"\n" +
+            "}";
+}
