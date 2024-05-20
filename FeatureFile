@@ -1,0 +1,34 @@
+Feature: TestRestApi
+  
+  Scenario: Perform "GET"
+    Given The baseURL "https://reqres.in"
+    When We Hit the endpoint "/api/users?page=2"
+    Then It should respond with statuscode 200
+  
+  
+  Scenario: Perform "POST"
+    Given the API endpoint is "/api/users"
+    When I create a new user
+    Then the response status code should be 201
+    And the response body should contain the new user details
+  
+  
+  Scenario: Perform "PUT"
+    Given PUT endpoint is "/api/users/2"
+    When I update a resourse
+    Then the response status code should be 200 for put
+    And the response body should contain the updated user details
+  
+  Scenario: Perform "PATCH"
+    Given PATCH endpoint is "/api/users/2"
+    When I update a resourse partially
+    Then the response status code should be 200 for patch
+    And the responsebody again should be updated
+  
+  Scenario: Perform "DELETE"
+    Given DELETE endpoint is "/api/users/2"
+    When I delete a user
+    Then the response status code should be 204 for delete
+    And the user should be successfully deleted
+     
+    
