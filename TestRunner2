@@ -1,0 +1,15 @@
+package TestRunner2;
+
+import io.cucumber.junit.Cucumber;
+import io.cucumber.junit.CucumberOptions;
+import org.junit.runner.RunWith;
+
+@RunWith(Cucumber.class)
+@CucumberOptions(
+        features = "src/test/java/FeatureFile2", // Path to your feature files
+        glue = {"classpath:MyStepdef2"} // Package where your step definitions are located
+
+)
+public class TestRunner2 {
+    // This class doesn't need any code, it just serves as a runner for Cucumber tests
+}
