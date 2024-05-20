@@ -1,0 +1,184 @@
+package MyStepdef2;
+
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
+
+import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class MyStepdef2 {
+
+    static Response response;
+    static RequestSpecification requestSpec = new RequestSpecBuilder()
+            .setBaseUri("https://reqres.in")
+            .setContentType(ContentType.JSON)
+            .build();
+    static ResponseSpecification responseSpec = new ResponseSpecBuilder()
+            .expectContentType(ContentType.JSON)
+            .build();
+    static String endpoint;
+    static String baseURL;
+
+    @Given("The baseURL {string}")
+    public void theBaseURL(String url) {
+        baseURL = url;
+        requestSpec = new RequestSpecBuilder()
+                .setBaseUri(baseURL)
+                .setContentType(ContentType.JSON)
+                .build();
+        System.out.println("=====================GET CRUD Started=================================");
+        System.out.println("Base URL set to: " + url);
+    }
+
+    @When("We Hit the endpoint {string}")
+    public void weHitTheEndpoint(String endpoint) {
+        this.endpoint = endpoint;
+        response = given()
+                .spec(requestSpec)
+                .when()
+                .get(endpoint)
+                .then()
+                .log().all()
+                .extract().response();
+    }
+
+    @Then("It should respond with statuscode {int}")
+    public void itShouldRespondWithStatuscode(Integer statusCode) {
+        assertEquals(statusCode.intValue(), response.getStatusCode(),
+                "Expected status code is " + statusCode + " but got " + response.getStatusCode());
+        System.out.println("=====================GET CRUD Looking Fine=================================");
+    }
+
+    @Given("the API endpoint is {string}")
+    public void theAPIEndpointIs(String apiEndpoint) {
+        System.out.println("=====================POST CRUD Started=================================");
+        endpoint = apiEndpoint;
+    }
+
+    @When("I create a new user")
+    public void iCreateANewUser() {
+        response = given()
+                .spec(requestSpec)
+                .body(Payloads.POST_PAYLOAD)
+                .when()
+                .post(endpoint)
+                .then()
+                .log().all()
+                .extract().response();
+    }
+
+    @Then("the response status code should be {int}")
+    public void theResponseStatusCodeShouldBe(int expectedStatusCode) {
+        assertEquals(expectedStatusCode, response.getStatusCode(), "Expected status code is " + expectedStatusCode);
+    }
+
+    @And("the response body should contain the new user details")
+    public void theResponseBodyShouldContainTheNewUserDetails() {
+        String responseBody = response.getBody().asString();
+        assertTrue(responseBody.contains("Sushant"));
+        assertTrue(responseBody.contains("SoftwareQA"));
+        System.out.println("=====================POST CRUD Looking Fine=================================");
+    }
+
+    @Given("PUT endpoint is {string}")
+    public void putEndpointIs(String endpoint) {
+        System.out.println("=====================PUT CRUD Started=================================");
+        this.endpoint = endpoint;
+        System.out.println("PUT endpoint set to: " + endpoint);
+    }
+
+    @When("I update a resourse")
+    public void iUpdateAResourse() {
+        response = given()
+                .spec(requestSpec)
+                .body(Payloads.PUT_PAYLOAD)
+                .when()
+                .put(endpoint)
+                .then()
+                .log().all()
+                .extract().response();
+    }
+
+    @Then("the response status code should be {int} for put")
+    public void theResponseStatusCodeShouldBeForPut(int expectedStatusCode) {
+        assertEquals(expectedStatusCode, response.getStatusCode());
+    }
+
+    @And("the response body should contain the updated user details")
+    public void theResponseBodyShouldContainTheUpdatedUserDetails() {
+        String responseBody = response.getBody().asString();
+        assertTrue(responseBody.contains("SushantGupta"));
+        assertTrue(responseBody.contains("AutomationQA"));
+        System.out.println("=====================PUT CRUD Looking Fine=================================");
+    }
+
+    @Given("PATCH endpoint is {string}")
+    public void patchEndpointIs(String endpoint) {
+        System.out.println("=====================PATCH CRUD Started=================================");
+        this.endpoint = endpoint;
+        System.out.println("PATCH endpoint set to: " + endpoint);
+    }
+
+    @When("I update a resourse partially")
+    public void iUpdateAResoursePartially() {
+        response = given()
+                .spec(requestSpec)
+                .body(Payloads.PATCH_PAYLOAD)
+                .when()
+                .patch(endpoint)
+                .then()
+                .log().all()
+                .extract().response();
+    }
+
+    @Then("the response status code should be {int} for patch")
+    public void theResponseStatusCodeShouldBeForPatch(int expectedStatusCode) {
+        assertEquals(expectedStatusCode, response.getStatusCode());
+    }
+
+    @And("the responsebody again should be updated")
+    public void theResponsebodyAgainShouldBeUpdated(){
+        String responseBody = response.getBody().asString();
+        assertTrue(responseBody.contains("SrAutomationQA"));
+        System.out.println("=====================PATCH CRUD Looking Fine=================================");
+    }
+
+    @Given("DELETE endpoint is {string}")
+    public void deleteEndpointIs(String endpoint) {
+        System.out.println("=====================DELETE CRUD Started=================================");
+        this.endpoint = endpoint;
+        System.out.println("DELETE endpoint set to: " + endpoint);
+    }
+
+    @When("I delete a user")
+    public void iDeleteAUser() {
+        response = given()
+                .spec(requestSpec)
+                .when()
+                .delete(endpoint)
+                .then()
+                .log().all()
+                .extract().response();
+    }
+
+    @Then("the response status code should be {int} for delete")
+    public void theResponseStatusCodeShouldBeForDelete(int expectedStatusCode) {
+        assertEquals(expectedStatusCode, response.getStatusCode());
+    }
+
+    @And("the user should be successfully deleted")
+    public void theUserShouldBeSuccessfullyDeleted() {
+        assertTrue(response.asString().isEmpty(), "User should be deleted successfully");
+        System.out.println("=====================DELETE CRUD Looking Fine=================================");
+    }
+
+}
