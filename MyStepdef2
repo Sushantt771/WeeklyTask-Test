@@ -51,11 +51,11 @@ public class MyStepdef2 {
                 .extract().response();
     }
 
-    @Then("It should respond with statuscode {int}")
-    public void itShouldRespondWithStatuscode(Integer statusCode) {
-        assertEquals(statusCode.intValue(), response.getStatusCode(),
-                "Expected status code is " + statusCode + " but got " + response.getStatusCode());
-        System.out.println("=====================GET CRUD Looking Fine=================================");
+   @Then("It should respond with statuscode {int}")
+public void itShouldRespondWithStatuscode(int statusCode) {
+    assertEquals(statusCode, response.getStatusCode());
+    System.out.println("=====================GET CRUD Looking Fine=================================");
+
     }
 
     @Given("the API endpoint is {string}")
