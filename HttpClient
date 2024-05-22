@@ -1,0 +1,130 @@
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+public class HttpClientCRUDOperations {
+
+    private static final String BASE_URL = "https://reqres.in/api";
+
+    // Method to perform GET request
+    public static void getUsers() throws URISyntaxException, IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(BASE_URL + "/users"))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println("GET Response:");
+        System.out.println(response.body());
+        System.out.println("--------------------------------------------------");
+    }
+
+    // Method to perform POST request
+    public static void createUser(String name, String job) throws URISyntaxException, IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(BASE_URL + "/users"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString("{\"name\": \"" + name + "\", \"job\": \"" + job + "\"}"))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println("POST Response:");
+        System.out.println("Status Code: " + response.statusCode());
+        System.out.println("Response Body: " + response.body());
+        if (response.statusCode() == 201) {
+            System.out.println("POST request was successful.");
+        } else {
+            System.out.println("POST request failed.");
+        }
+        System.out.println("--------------------------------------------------");
+    }
+
+    // Method to perform PUT request
+    public static void updateUser(int userId, String name, String job) throws URISyntaxException, IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(BASE_URL + "/users/" + userId))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString("{\"name\": \"" + name + "\", \"job\": \"" + job + "\"}"))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println("PUT Response:");
+        System.out.println("Status Code: " + response.statusCode());
+        System.out.println("Response Body: " + response.body());
+        if (response.statusCode() == 200) {
+            System.out.println("PUT request was successful.");
+        } else {
+            System.out.println("PUT request failed.");
+        }
+        System.out.println("--------------------------------------------------");
+    }
+
+    // Method to perform PATCH request
+    public static void patchUser(int userId, String job) throws URISyntaxException, IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(BASE_URL + "/users/" + userId))
+                .header("Content-Type", "application/json")
+                .method("PATCH", HttpRequest.BodyPublishers.ofString("{\"job\": \"" + job + "\"}"))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println("PATCH Response:");
+        System.out.println("Status Code: " + response.statusCode());
+        System.out.println("Response Body: " + response.body());
+        if (response.statusCode() == 200) {
+            System.out.println("PATCH request was successful.");
+        } else {
+            System.out.println("PATCH request failed.");
+        }
+        System.out.println("--------------------------------------------------");
+    }
+
+    // Method to perform DELETE request
+    public static void deleteUser(int userId) throws URISyntaxException, IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(BASE_URL + "/users/" + userId))
+                .DELETE()
+                .build();
+
+        HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+
+        System.out.println("DELETE Response:");
+        System.out.println("Delete status code: " + response.statusCode());
+        if (response.statusCode() == 204) {
+            System.out.println("DELETE request was successful.");
+        } else {
+            System.out.println("DELETE request failed.");
+        }
+        System.out.println("--------------------------------------------------");
+    }
+
+    // Main method to demonstrate usage
+    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
+        // Perform GET request
+        getUsers();
+
+        // Perform POST request
+        createUser("John Doe", "Software Engineer");
+
+        // Perform PUT request
+        updateUser(2, "Jane Doe", "Data Scientist");
+
+        // Perform PATCH request
+        patchUser(2, "Senior Data Scientist");
+
+        // Perform DELETE request
+        deleteUser(2);
+    }
+}
