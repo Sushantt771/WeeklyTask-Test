@@ -1,0 +1,126 @@
+package HttpClientStepDef;
+
+import HttpClientPayLoad.HttpClientPayLoad;
+import io.cucumber.java.en.*;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.*;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
+public class HttpClientStepDef {
+
+    private HttpClient client;
+    private HttpResponse response;
+    private String baseURL;
+
+    // Method to load base URL from properties file
+    @Given("the base URL is loaded from the properties file")
+    public void loadBaseURLFromPropertiesFile() throws IOException {
+        Properties prop = new Properties();
+        prop.load(new FileInputStream(new File("src/test/configuration.properties")));
+        baseURL = prop.getProperty("baseURL");
+        client = HttpClientBuilder.create().build();
+    }
+
+    // Method to log response details including headers
+    private void logResponse() throws IOException {
+        System.out.println("Response status code: " + response.getStatusLine().getStatusCode());
+        System.out.println("Response headers:");
+        Header[] headers = response.getAllHeaders();
+        for (Header header : headers) {
+            System.out.println(header.getName() + ": " + header.getValue());
+        }
+        if (response.getEntity() != null) {
+            System.out.println("Response body: " + EntityUtils.toString(response.getEntity()));
+        } else {
+            System.out.println("Response body is null");
+        }
+        System.out.println("--------------------------------------------------");
+    }
+
+    // Method to send GET request
+    @When("I send a GET request to {string}")
+    public void sendGetRequest(String endpoint) throws IOException {
+        HttpGet request = new HttpGet(baseURL + endpoint);
+        response = client.execute(request);
+        logResponse();
+    }
+
+    // Method to send POST request
+    @When("I make a POST request to {string} with the payload")
+    public void sendPostRequestWithPayload(String endpoint) throws IOException {
+        HttpPost request = new HttpPost(baseURL + endpoint);
+        request.setEntity(new StringEntity(HttpClientPayLoad.POST_PAYLOAD));
+        response = client.execute(request);
+        logResponse();
+    }
+
+    // Method to send PUT request
+    @When("I send a PUT request to {string} with the payload")
+    public void sendPutRequestWithPayload(String endpoint) throws IOException {
+        HttpPut request = new HttpPut(baseURL + endpoint);
+        request.setEntity(new StringEntity(HttpClientPayLoad.PUT_PAYLOAD));
+        response = client.execute(request);
+        logResponse();
+    }
+
+    // Method to send PATCH request
+    @When("I execute a PATCH request to {string} with the payload")
+    public void sendPatchRequestWithPayload(String endpoint) throws IOException {
+        HttpPatch request = new HttpPatch(baseURL + endpoint);
+        request.setEntity(new StringEntity(HttpClientPayLoad.PATCH_PAYLOAD));
+        response = client.execute(request);
+        logResponse();
+    }
+
+    // Method to send DELETE request
+    @When("I send a DELETE request to {string}")
+    public void sendDeleteRequest(String endpoint) throws IOException {
+        HttpDelete request = new HttpDelete(baseURL + endpoint);
+        response = client.execute(request);
+        logResponse();
+    }
+
+    // Method to ensure response status code
+    @Then("I ensure the response status code is {int}")
+    public void ensureResponseStatusCodeIs(int expectedStatusCode) {
+        int actualStatusCode = response.getStatusLine().getStatusCode();
+        assert actualStatusCode == expectedStatusCode : "Expected status code: " + expectedStatusCode + ", but found: " + actualStatusCode;
+    }
+
+    // Method to validate response status code
+    @Then("I validate the response status code is {int}")
+    public void validateResponseStatusCodeIs(int expectedStatusCode) {
+        int actualStatusCode = response.getStatusLine().getStatusCode();
+        assert actualStatusCode == expectedStatusCode : "Expected status code: " + expectedStatusCode + ", but found: " + actualStatusCode;
+    }
+
+    // Method to verify response status code
+    @Then("I verify the response status code is {int}")
+    public void verifyResponseStatusCode(int expectedStatusCode) {
+        int actualStatusCode = response.getStatusLine().getStatusCode();
+        assert actualStatusCode == expectedStatusCode : "Expected status code: " + expectedStatusCode + ", but found: " + actualStatusCode;
+    }
+
+    // Method to check response status code
+    @Then("I check the response status code to be {int}")
+    public void checkResponseStatusCode(int expectedStatusCode) {
+        int actualStatusCode = response.getStatusLine().getStatusCode();
+        assert actualStatusCode == expectedStatusCode : "Expected status code: " + expectedStatusCode + ", but found: " + actualStatusCode;
+    }
+
+    // Method to expect response status code
+    @Then("I expect the response status code to be {int}")
+    public void i_expect_the_response_status_code_to_be(Integer int1) {
+        int actualStatusCode = response.getStatusLine().getStatusCode();
+        assert actualStatusCode == int1 : "Expected status code: " + int1 + ", but found: " + actualStatusCode;
+    }
+}
