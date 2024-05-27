@@ -1,0 +1,24 @@
+Feature: API Testing using HttpClient
+  
+  Background:
+    Given the base URL is loaded from the properties file
+  
+  Scenario: Perform GET request
+    When I send a GET request to "/users/1"
+    Then I expect the response status code to be 200
+  
+  Scenario: Perform POST request
+    When I make a POST request to "/users" with the payload
+    Then I check the response status code to be 201
+  
+  Scenario: Perform PUT request
+    When I send a PUT request to "/users/2" with the payload
+    Then I verify the response status code is 200
+  
+  Scenario: Perform PATCH request
+    When I execute a PATCH request to "/users/2" with the payload
+    Then I validate the response status code is 200
+  
+  Scenario: Perform DELETE request
+    When I send a DELETE request to "/users/2"
+    Then I ensure the response status code is 204
