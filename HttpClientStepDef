@@ -2,125 +2,145 @@ package HttpClientStepDef;
 
 import HttpClientPayLoad.HttpClientPayLoad;
 import io.cucumber.java.en.*;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.*;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+import org.junit.Assert;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Properties;
 
 public class HttpClientStepDef {
 
-    private HttpClient client;
-    private HttpResponse response;
-    private String baseURL;
+    private static String BASE_URL;
+    private HttpResponse<String> response;
+    private HttpResponse<Void> deleteResponse;
 
-    // Method to load base URL from properties file
+    // Load base URL from properties file
     @Given("the base URL is loaded from the properties file")
     public void loadBaseURLFromPropertiesFile() throws IOException {
         Properties prop = new Properties();
         prop.load(new FileInputStream(new File("src/test/configuration.properties")));
-        baseURL = prop.getProperty("baseURL");
-        client = HttpClientBuilder.create().build();
+        BASE_URL = prop.getProperty("baseURL");
     }
 
-    // Method to log response details including headers
-    private void logResponse() throws IOException {
-        System.out.println("Response status code: " + response.getStatusLine().getStatusCode());
-        System.out.println("Response headers:");
-        Header[] headers = response.getAllHeaders();
-        for (Header header : headers) {
-            System.out.println(header.getName() + ": " + header.getValue());
-        }
-        if (response.getEntity() != null) {
-            System.out.println("Response body: " + EntityUtils.toString(response.getEntity()));
-        } else {
-            System.out.println("Response body is null");
-        }
+    // Log the response
+    private void logResponse(HttpResponse<String> response) {
+        System.out.println("Response status code: " + response.statusCode());
+        System.out.println("Response headers: " + response.headers());
+        System.out.println("Response body: " + response.body());
         System.out.println("--------------------------------------------------");
     }
 
-    // Method to send GET request
+    // Log the response for DELETE request
+    private void logDeleteResponse(HttpResponse<Void> response) {
+        System.out.println("Response status code: " + response.statusCode());
+        System.out.println("Response headers: " + response.headers());
+        System.out.println("--------------------------------------------------");
+    }
+
+    // Send a GET request
     @When("I send a GET request to {string}")
-    public void sendGetRequest(String endpoint) throws IOException {
-        HttpGet request = new HttpGet(baseURL + endpoint);
-        response = client.execute(request);
-        logResponse();
+    public void sendGetRequest(String endpoint) throws URISyntaxException, IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(BASE_URL + endpoint))
+                .GET()
+                .build();
+
+        response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        logResponse(response);
     }
 
-    // Method to send POST request
+    // Validate the status code
+    @Then("I expect the response status code to be {int}")
+    public void expectResponseStatusCodeToBe(int expectedStatusCode) {
+        Assert.assertEquals("Expected status code: " + expectedStatusCode + ", but got: " + response.statusCode(), expectedStatusCode, response.statusCode());
+    }
+
+    // Send a POST request with the payload
     @When("I make a POST request to {string} with the payload")
-    public void sendPostRequestWithPayload(String endpoint) throws IOException {
-        HttpPost request = new HttpPost(baseURL + endpoint);
-        request.setEntity(new StringEntity(HttpClientPayLoad.POST_PAYLOAD));
-        response = client.execute(request);
-        logResponse();
+    public void sendPostRequestWithPayload(String endpoint) throws URISyntaxException, IOException, InterruptedException {
+        String payload = HttpClientPayLoad.POST_PAYLOAD;
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(BASE_URL + endpoint))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(payload))
+                .build();
+
+        response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        logResponse(response);
     }
 
-    // Method to send PUT request
-    @When("I send a PUT request to {string} with the payload")
-    public void sendPutRequestWithPayload(String endpoint) throws IOException {
-        HttpPut request = new HttpPut(baseURL + endpoint);
-        request.setEntity(new StringEntity(HttpClientPayLoad.PUT_PAYLOAD));
-        response = client.execute(request);
-        logResponse();
-    }
-
-    // Method to send PATCH request
-    @When("I execute a PATCH request to {string} with the payload")
-    public void sendPatchRequestWithPayload(String endpoint) throws IOException {
-        HttpPatch request = new HttpPatch(baseURL + endpoint);
-        request.setEntity(new StringEntity(HttpClientPayLoad.PATCH_PAYLOAD));
-        response = client.execute(request);
-        logResponse();
-    }
-
-    // Method to send DELETE request
-    @When("I send a DELETE request to {string}")
-    public void sendDeleteRequest(String endpoint) throws IOException {
-        HttpDelete request = new HttpDelete(baseURL + endpoint);
-        response = client.execute(request);
-        logResponse();
-    }
-
-    // Method to ensure response status code
-    @Then("I ensure the response status code is {int}")
-    public void ensureResponseStatusCodeIs(int expectedStatusCode) {
-        int actualStatusCode = response.getStatusLine().getStatusCode();
-        assert actualStatusCode == expectedStatusCode : "Expected status code: " + expectedStatusCode + ", but found: " + actualStatusCode;
-    }
-
-    // Method to validate response status code
-    @Then("I validate the response status code is {int}")
-    public void validateResponseStatusCodeIs(int expectedStatusCode) {
-        int actualStatusCode = response.getStatusLine().getStatusCode();
-        assert actualStatusCode == expectedStatusCode : "Expected status code: " + expectedStatusCode + ", but found: " + actualStatusCode;
-    }
-
-    // Method to verify response status code
-    @Then("I verify the response status code is {int}")
-    public void verifyResponseStatusCode(int expectedStatusCode) {
-        int actualStatusCode = response.getStatusLine().getStatusCode();
-        assert actualStatusCode == expectedStatusCode : "Expected status code: " + expectedStatusCode + ", but found: " + actualStatusCode;
-    }
-
-    // Method to check response status code
+    // Check the response status code
     @Then("I check the response status code to be {int}")
     public void checkResponseStatusCode(int expectedStatusCode) {
-        int actualStatusCode = response.getStatusLine().getStatusCode();
-        assert actualStatusCode == expectedStatusCode : "Expected status code: " + expectedStatusCode + ", but found: " + actualStatusCode;
+        Assert.assertEquals("Expected status code: " + expectedStatusCode + ", but got: " + response.statusCode(), expectedStatusCode, response.statusCode());
     }
 
-    // Method to expect response status code
-    @Then("I expect the response status code to be {int}")
-    public void i_expect_the_response_status_code_to_be(Integer int1) {
-        int actualStatusCode = response.getStatusLine().getStatusCode();
-        assert actualStatusCode == int1 : "Expected status code: " + int1 + ", but found: " + actualStatusCode;
+    // Send a PUT request with the payload
+    @When("I send a PUT request to {string} with the payload")
+    public void sendPutRequestWithPayload(String endpoint) throws URISyntaxException, IOException, InterruptedException {
+        String payload = HttpClientPayLoad.PUT_PAYLOAD;
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(BASE_URL + endpoint))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(payload))
+                .build();
+
+        response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        logResponse(response);
+    }
+
+    // Verify the response status code
+    @Then("I verify the response status code is {int}")
+    public void verifyResponseStatusCodeIs(int expectedStatusCode) {
+        Assert.assertEquals("Expected status code: " + expectedStatusCode + ", but got: " + response.statusCode(), expectedStatusCode, response.statusCode());
+    }
+
+    // Send a PATCH request with the payload
+    @When("I execute a PATCH request to {string} with the payload")
+    public void sendPatchRequestWithPayload(String endpoint) throws URISyntaxException, IOException, InterruptedException {
+        String payload = HttpClientPayLoad.PATCH_PAYLOAD;
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(BASE_URL + endpoint))
+                .header("Content-Type", "application/json")
+                .method("PATCH", HttpRequest.BodyPublishers.ofString(payload))
+                .build();
+
+        response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        logResponse(response);
+    }
+
+    // Validate the response status code
+    @Then("I validate the response status code is {int}")
+    public void validateResponseStatusCodeIs(int expectedStatusCode) {
+        Assert.assertEquals("Expected status code: " + expectedStatusCode + ", but got: " + response.statusCode(), expectedStatusCode, response.statusCode());
+    }
+
+    // Send a DELETE request
+    @When("I send a DELETE request to {string}")
+    public void sendDeleteRequest(String endpoint) throws URISyntaxException, IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(BASE_URL + endpoint))
+                .DELETE()
+                .build();
+
+        deleteResponse = client.send(request, HttpResponse.BodyHandlers.discarding());
+        logDeleteResponse(deleteResponse);
+    }
+
+    // Ensure the response status code
+    @Then("I ensure the response status code is {int}")
+    public void ensureResponseStatusCodeIs(int expectedStatusCode) {
+        Assert.assertEquals("Expected status code: " + expectedStatusCode + ", but got: " + deleteResponse.statusCode(), expectedStatusCode, deleteResponse.statusCode());
     }
 }
