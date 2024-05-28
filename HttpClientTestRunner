@@ -1,0 +1,15 @@
+ackage HttpClientTestRunner;
+
+import io.cucumber.junit.Cucumber;
+import io.cucumber.junit.CucumberOptions;
+import org.junit.runner.RunWith;
+
+@RunWith(Cucumber.class)
+@CucumberOptions(
+        features = "src/test/java/HttpClientfeature", // Path to your feature files
+        glue = {"classpath:HttpClientStepDef"} // Package where your step definitions are located
+
+)
+public class HttpClientTestRunner {
+    // This class doesn't need any code, it just serves as a runner for Cucumber tests
+}
