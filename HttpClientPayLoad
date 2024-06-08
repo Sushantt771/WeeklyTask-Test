@@ -1,0 +1,20 @@
+package HttpClientPayLoad;
+
+public class HttpClientPayLoad {
+
+    public static final String POST_PAYLOAD = "{\n" +
+            "    \"name\": \"John\",\n" +
+            "    \"job\": \"Engineer\"\n" +
+            "}";
+
+    public static final String PUT_PAYLOAD = "{\n" +
+            "    \"name\": \"Jane\",\n" +
+            "    \"job\": \"Developer\"\n" +
+            "}";
+
+    public static final String PATCH_PAYLOAD = "{\n" +
+            "    \"job\": \"Senior Developer\"\n" +
+            "}";
+
+    // Add more payloads as needed
+}
